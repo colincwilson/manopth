@@ -125,6 +125,9 @@ class ManoLayer(Module):
                 root_palm=torch.Tensor([0]),
                 share_betas=torch.Tensor([0]),
                 ):
+<<<<<<< HEAD
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
+=======
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
         """
         Args:
@@ -145,8 +148,12 @@ class ManoLayer(Module):
             if self.use_pca:
                 # PCA components --> axis angles
 <<<<<<< HEAD
+<<<<<<< HEAD
                 th_full_hand_pose = th_hand_pose_coeffs.mm(
                     self.th_selected_comps)
+=======
+                th_full_hand_pose = th_hand_pose_coeffs.mm(self.th_selected_comps)
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
                 th_full_hand_pose = th_hand_pose_coeffs.mm(self.th_selected_comps)
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
@@ -167,6 +174,7 @@ class ManoLayer(Module):
             else:
                 # th_posemap offsets by 3, so add offset or 3 to get to self.rot=6
 <<<<<<< HEAD
+<<<<<<< HEAD
                 th_pose_map, th_rot_map = th_posemap_axisang(th_full_pose[:,
                                                                           6:])
                 if self.robust_rot:
@@ -176,11 +184,16 @@ class ManoLayer(Module):
                     root_rot = rot6d.compute_rotation_matrix_from_ortho6d(
                         th_full_pose[:, :6])
 =======
+=======
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
                 th_pose_map, th_rot_map = th_posemap_axisang(th_full_pose[:, 6:])
                 if self.robust_rot:
                     root_rot = rot6d.robust_compute_rotation_matrix_from_ortho6d(th_full_pose[:, :6])
                 else:
                     root_rot = rot6d.compute_rotation_matrix_from_ortho6d(th_full_pose[:, :6])
+<<<<<<< HEAD
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
+=======
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
         else:
             assert th_pose_coeffs.dim() == 4, (
@@ -206,8 +219,12 @@ class ManoLayer(Module):
         else:
             if share_betas:
 <<<<<<< HEAD
+<<<<<<< HEAD
                 th_betas = th_betas.mean(0, keepdim=True).expand(
                     th_betas.shape[0], 10)
+=======
+                th_betas = th_betas.mean(0, keepdim=True).expand(th_betas.shape[0], 10)
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
                 th_betas = th_betas.mean(0, keepdim=True).expand(th_betas.shape[0], 10)
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
@@ -242,10 +259,15 @@ class ManoLayer(Module):
         all_transforms = [root_trans.unsqueeze(1)]
         lev1_j_rel = lev1_j - root_j.transpose(1, 2)
 <<<<<<< HEAD
+<<<<<<< HEAD
         lev1_rel_transform_flt = th_with_zeros(
             torch.cat([lev1_rots, lev1_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
         root_trans_flt = root_trans.unsqueeze(1).repeat(1, 5, 1, 1).view(
             root_trans.shape[0] * 5, 4, 4)
+=======
+        lev1_rel_transform_flt = th_with_zeros(torch.cat([lev1_rots, lev1_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+        root_trans_flt = root_trans.unsqueeze(1).repeat(1, 5, 1, 1).view(root_trans.shape[0] * 5, 4, 4)
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
         lev1_rel_transform_flt = th_with_zeros(torch.cat([lev1_rots, lev1_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
         root_trans_flt = root_trans.unsqueeze(1).repeat(1, 5, 1, 1).view(root_trans.shape[0] * 5, 4, 4)
@@ -256,8 +278,12 @@ class ManoLayer(Module):
         # Get lev2 results
         lev2_j_rel = lev2_j - lev1_j
 <<<<<<< HEAD
+<<<<<<< HEAD
         lev2_rel_transform_flt = th_with_zeros(
             torch.cat([lev2_rots, lev2_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+=======
+        lev2_rel_transform_flt = th_with_zeros(torch.cat([lev2_rots, lev2_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
         lev2_rel_transform_flt = th_with_zeros(torch.cat([lev2_rots, lev2_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
@@ -267,8 +293,12 @@ class ManoLayer(Module):
         # Get lev3 results
         lev3_j_rel = lev3_j - lev2_j
 <<<<<<< HEAD
+<<<<<<< HEAD
         lev3_rel_transform_flt = th_with_zeros(
             torch.cat([lev3_rots, lev3_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+=======
+        lev3_rel_transform_flt = th_with_zeros(torch.cat([lev3_rots, lev3_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
         lev3_rel_transform_flt = th_with_zeros(torch.cat([lev3_rots, lev3_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
@@ -282,9 +312,13 @@ class ManoLayer(Module):
         joint_js = torch.cat([th_j, th_j.new_zeros(th_j.shape[0], 16, 1)], 2)
         tmp2 = torch.matmul(th_results, joint_js.unsqueeze(3))
 <<<<<<< HEAD
+<<<<<<< HEAD
         th_results2 = (th_results - torch.cat(
             [tmp2.new_zeros(*tmp2.shape[:2], 4, 3), tmp2], 3)).permute(
                 0, 2, 3, 1)
+=======
+        th_results2 = (th_results - torch.cat([tmp2.new_zeros(*tmp2.shape[:2], 4, 3), tmp2], 3)).permute(0, 2, 3, 1)
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
         th_results2 = (th_results - torch.cat([tmp2.new_zeros(*tmp2.shape[:2], 4, 3), tmp2], 3)).permute(0, 2, 3, 1)
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
@@ -314,10 +348,14 @@ class ManoLayer(Module):
 
         # Reorder joints to match visualization utilities
 <<<<<<< HEAD
+<<<<<<< HEAD
         th_jtr = th_jtr[:, [
             0, 13, 14, 15, 16, 1, 2, 3, 17, 4, 5, 6, 18, 10, 11, 12, 19, 7, 8,
             9, 20
         ]]
+=======
+        th_jtr = th_jtr[:, [0, 13, 14, 15, 16, 1, 2, 3, 17, 4, 5, 6, 18, 10, 11, 12, 19, 7, 8, 9, 20]]
+>>>>>>> 156538db48c36332446e014abd2bad4f747ea648
 =======
         th_jtr = th_jtr[:, [0, 13, 14, 15, 16, 1, 2, 3, 17, 4, 5, 6, 18, 10, 11, 12, 19, 7, 8, 9, 20]]
 >>>>>>> 156538db48c36332446e014abd2bad4f747ea648
