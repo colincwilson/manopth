@@ -18,15 +18,15 @@ Modules included:
 
 '''
 
-
 __all__ = ['load_model', 'save_model']
 
 import numpy as np
 import pickle
 import chumpy as ch
 from chumpy.ch import MatVecMult
-from mano.webuser.posemapper import posemap
-from mano.webuser.verts import verts_core
+from manopth_mano.webuser.posemapper import posemap
+from manopth_mano.webuser.verts import verts_core
+
 
 def ready_arguments(fname_or_dict):
 

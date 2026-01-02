@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from torch.nn import Module
 
-from mano.webuser.smpl_handpca_wrapper_HAND_only import ready_arguments
+from manopth_mano.webuser.smpl_handpca_wrapper_HAND_only import ready_arguments
 from manopth import rodrigues_layer, rotproj, rot6d
 from manopth.tensutils import (th_posemap_axisang, th_with_zeros, th_pack,
                                subtract_flat_id, make_list)
@@ -82,8 +82,9 @@ class ManoLayer(Module):
             torch.Tensor(np.array(smpl_data['J_regressor'].toarray())))
         self.register_buffer('th_weights',
                              torch.Tensor(smpl_data['weights'].r))
-        self.register_buffer('th_faces',
-                             torch.Tensor(smpl_data['f'].astype(np.int32)).long())
+        self.register_buffer(
+            'th_faces',
+            torch.Tensor(smpl_data['f'].astype(np.int32)).long())
 
         # Get hand mean
         hands_mean = np.zeros(hands_components.shape[1]
@@ -107,13 +108,14 @@ class ManoLayer(Module):
         parents = list(self.kintree_table[0].tolist())
         self.kintree_parents = parents
 
-    def forward(self,
-                th_pose_coeffs,
-                th_betas=torch.zeros(1),
-                th_trans=torch.zeros(1),
-                root_palm=torch.Tensor([0]),
-                share_betas=torch.Tensor([0]),
-                ):
+    def forward(
+            self,
+            th_pose_coeffs,
+            th_betas=torch.zeros(1),
+            th_trans=torch.zeros(1),
+            root_palm=torch.Tensor([0]),
+            share_betas=torch.Tensor([0]),
+    ):
         """
         Args:
         th_trans (Tensor (batch_size x ncomps)): if provided, applies trans to joints and vertices
@@ -132,7 +134,8 @@ class ManoLayer(Module):
                                                  self.ncomps]
             if self.use_pca:
                 # PCA components --> axis angles
-                th_full_hand_pose = th_hand_pose_coeffs.mm(self.th_selected_comps)
+                th_full_hand_pose = th_hand_pose_coeffs.mm(
+                    self.th_selected_comps)
             else:
                 th_full_hand_pose = th_hand_pose_coeffs
 
@@ -149,11 +152,14 @@ class ManoLayer(Module):
                 th_pose_map = th_pose_map[:, 9:]
             else:
                 # th_posemap offsets by 3, so add offset or 3 to get to self.rot=6
-                th_pose_map, th_rot_map = th_posemap_axisang(th_full_pose[:, 6:])
+                th_pose_map, th_rot_map = th_posemap_axisang(th_full_pose[:,
+                                                                          6:])
                 if self.robust_rot:
-                    root_rot = rot6d.robust_compute_rotation_matrix_from_ortho6d(th_full_pose[:, :6])
+                    root_rot = rot6d.robust_compute_rotation_matrix_from_ortho6d(
+                        th_full_pose[:, :6])
                 else:
-                    root_rot = rot6d.compute_rotation_matrix_from_ortho6d(th_full_pose[:, :6])
+                    root_rot = rot6d.compute_rotation_matrix_from_ortho6d(
+                        th_full_pose[:, :6])
         else:
             assert th_pose_coeffs.dim() == 4, (
                 'When not self.use_pca, '
@@ -172,12 +178,13 @@ class ManoLayer(Module):
             th_v_shaped = torch.matmul(self.th_shapedirs,
                                        self.th_betas.transpose(1, 0)).permute(
                                            2, 0, 1) + self.th_v_template
-            th_j = torch.matmul(self.th_J_regressor, th_v_shaped).repeat(
-                batch_size, 1, 1)
+            th_j = torch.matmul(self.th_J_regressor,
+                                th_v_shaped).repeat(batch_size, 1, 1)
 
         else:
             if share_betas:
-                th_betas = th_betas.mean(0, keepdim=True).expand(th_betas.shape[0], 10)
+                th_betas = th_betas.mean(0, keepdim=True).expand(
+                    th_betas.shape[0], 10)
             th_v_shaped = torch.matmul(self.th_shapedirs,
                                        th_betas.transpose(1, 0)).permute(
                                            2, 0, 1) + self.th_v_template
@@ -208,20 +215,24 @@ class ManoLayer(Module):
         # Get lev1 results
         all_transforms = [root_trans.unsqueeze(1)]
         lev1_j_rel = lev1_j - root_j.transpose(1, 2)
-        lev1_rel_transform_flt = th_with_zeros(torch.cat([lev1_rots, lev1_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
-        root_trans_flt = root_trans.unsqueeze(1).repeat(1, 5, 1, 1).view(root_trans.shape[0] * 5, 4, 4)
+        lev1_rel_transform_flt = th_with_zeros(
+            torch.cat([lev1_rots, lev1_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+        root_trans_flt = root_trans.unsqueeze(1).repeat(1, 5, 1, 1).view(
+            root_trans.shape[0] * 5, 4, 4)
         lev1_flt = torch.matmul(root_trans_flt, lev1_rel_transform_flt)
         all_transforms.append(lev1_flt.view(all_rots.shape[0], 5, 4, 4))
 
         # Get lev2 results
         lev2_j_rel = lev2_j - lev1_j
-        lev2_rel_transform_flt = th_with_zeros(torch.cat([lev2_rots, lev2_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+        lev2_rel_transform_flt = th_with_zeros(
+            torch.cat([lev2_rots, lev2_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
         lev2_flt = torch.matmul(lev1_flt, lev2_rel_transform_flt)
         all_transforms.append(lev2_flt.view(all_rots.shape[0], 5, 4, 4))
 
         # Get lev3 results
         lev3_j_rel = lev3_j - lev2_j
-        lev3_rel_transform_flt = th_with_zeros(torch.cat([lev3_rots, lev3_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
+        lev3_rel_transform_flt = th_with_zeros(
+            torch.cat([lev3_rots, lev3_j_rel.unsqueeze(3)], 3).view(-1, 3, 4))
         lev3_flt = torch.matmul(lev2_flt, lev3_rel_transform_flt)
         all_transforms.append(lev3_flt.view(all_rots.shape[0], 5, 4, 4))
 
@@ -231,7 +242,9 @@ class ManoLayer(Module):
 
         joint_js = torch.cat([th_j, th_j.new_zeros(th_j.shape[0], 16, 1)], 2)
         tmp2 = torch.matmul(th_results, joint_js.unsqueeze(3))
-        th_results2 = (th_results - torch.cat([tmp2.new_zeros(*tmp2.shape[:2], 4, 3), tmp2], 3)).permute(0, 2, 3, 1)
+        th_results2 = (th_results - torch.cat(
+            [tmp2.new_zeros(*tmp2.shape[:2], 4, 3), tmp2], 3)).permute(
+                0, 2, 3, 1)
 
         th_T = torch.matmul(th_results2, self.th_weights.transpose(0, 1))
 
@@ -257,7 +270,10 @@ class ManoLayer(Module):
         th_jtr = torch.cat([th_jtr, tips], 1)
 
         # Reorder joints to match visualization utilities
-        th_jtr = th_jtr[:, [0, 13, 14, 15, 16, 1, 2, 3, 17, 4, 5, 6, 18, 10, 11, 12, 19, 7, 8, 9, 20]]
+        th_jtr = th_jtr[:, [
+            0, 13, 14, 15, 16, 1, 2, 3, 17, 4, 5, 6, 18, 10, 11, 12, 19, 7, 8,
+            9, 20
+        ]]
 
         if th_trans is None or bool(torch.norm(th_trans) == 0):
             if self.center_idx is not None:

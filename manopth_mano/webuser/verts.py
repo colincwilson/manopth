@@ -18,10 +18,9 @@ Modules included:
 
 '''
 
-
 import chumpy
-import mano.webuser.lbs as lbs
-from mano.webuser.posemapper import posemap
+import manopth_mano.webuser.lbs as lbs
+from manopth_mano.webuser.posemapper import posemap
 import scipy.sparse as sp
 from chumpy.ch import MatVecMult
 
@@ -75,8 +74,13 @@ def verts_decorated(trans,
         assert (ischumpy(J))
 
     assert (bs_style == 'lbs')
-    result, Jtr = lbs.verts_core(
-        pose, v, J, weights, kintree_table, want_Jtr=True, xp=chumpy)
+    result, Jtr = lbs.verts_core(pose,
+                                 v,
+                                 J,
+                                 weights,
+                                 kintree_table,
+                                 want_Jtr=True,
+                                 xp=chumpy)
 
     tr = trans.reshape((1, 3))
     result = result + tr

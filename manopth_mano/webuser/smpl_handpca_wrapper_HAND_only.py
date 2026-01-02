@@ -24,7 +24,7 @@ def ready_arguments(fname_or_dict, posekey4vposed='pose'):
     import pickle
     import chumpy as ch
     from chumpy.ch import MatVecMult
-    from mano.webuser.posemapper import posemap
+    from manopth_mano.webuser.posemapper import posemap
 
     if not isinstance(fname_or_dict, dict):
         dd = pickle.load(open(fname_or_dict, 'rb'), encoding='latin1')
@@ -87,8 +87,8 @@ def load_model(fname_or_dict, ncomps=6, flat_hand_mean=False, v_template=None):
     rot = 3  # for global orientation!!!
 
     hands_components = smpl_data['hands_components']
-    hands_mean = np.zeros(hands_components.shape[
-        1]) if flat_hand_mean else smpl_data['hands_mean']
+    hands_mean = np.zeros(hands_components.shape[1]
+                          ) if flat_hand_mean else smpl_data['hands_mean']
     hands_coeffs = smpl_data['hands_coeffs'][:, :ncomps]
 
     selected_components = np.vstack((hands_components[:ncomps]))
@@ -97,8 +97,8 @@ def load_model(fname_or_dict, ncomps=6, flat_hand_mean=False, v_template=None):
     pose_coeffs = ch.zeros(rot + selected_components.shape[0])
     full_hand_pose = pose_coeffs[rot:(rot + ncomps)].dot(selected_components)
 
-    smpl_data['fullpose'] = ch.concatenate((pose_coeffs[:rot],
-                                            hands_mean + full_hand_pose))
+    smpl_data['fullpose'] = ch.concatenate(
+        (pose_coeffs[:rot], hands_mean + full_hand_pose))
     smpl_data['pose'] = pose_coeffs
 
     Jreg = smpl_data['J_regressor']

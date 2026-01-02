@@ -18,8 +18,7 @@ Modules included:
 
 '''
 
-
-from mano.webuser.posemapper import posemap
+from manopth_mano.webuser.posemapper import posemap
 import chumpy
 import numpy as np
 
@@ -47,8 +46,8 @@ def global_rigid_transformation(pose, J, kintree_table, xp):
     for i in range(1, kintree_table.shape[1]):
         results[i] = results[parent[i]].dot(
             with_zeros(
-                xp.hstack((rodrigues(pose[i, :]), ((J[i, :] - J[parent[i], :]
-                                                    ).reshape((3, 1)))))))
+                xp.hstack((rodrigues(pose[i, :]),
+                           ((J[i, :] - J[parent[i], :]).reshape((3, 1)))))))
 
     pack = lambda x: xp.hstack([np.zeros((4, 3)), x.reshape((4, 1))])
 
